@@ -1,6 +1,30 @@
 @ExamApiDemo_HostAddress = http://localhost:5209
 
-GET {{ExamApiDemo_HostAddress}}/weatherforecast/
+### Get All Courses
+GET {{ExamApiDemo_HostAddress}}/api/course
 Accept: application/json
 
 ###
+
+### Get Course By Id
+GET {{ExamApiDemo_HostAddress}}/api/course/101
+Accept: application/json
+
+###
+
+### Get Student Results
+GET {{ExamApiDemo_HostAddress}}/api/examresult?idno=101&sessionno=1
+Accept: application/json
+
+###
+
+### Calculate Result
+POST {{ExamApiDemo_HostAddress}}/api/examresult/calculate
+Content-Type: application/json
+
+{
+  "idno": 101,
+  "sessionno": 1,
+  "courseno": 101,
+  "semesterno": 1
+}
