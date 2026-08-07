@@ -17,6 +17,23 @@ to modern .NET development.
 - Pagination support
 - Soft delete pattern for exam records
 
+## Domain Context
+
+The business logic implemented in this project is inspired by real-world examination workflows gained through 3+ years of experience developing and maintaining the examination module of a multi-tenant academic ERP platform serving 14+ institutions.
+
+The project demonstrates enterprise backend patterns such as:
+
+- Component-level pass/fail determination
+- Result calculation
+- Grade calculation
+- Service layer architecture
+- Dependency Injection
+- Global Exception Handling Middleware
+- Pagination
+- Soft Delete pattern for audit trail preservation
+
+While simplified for learning purposes, the implementation follows real production concepts used in examination management systems.
+
 ## Project Structure
 - Controllers/ — API controllers (ExamController, CourseController, ExamResultController)
 - Services/ — Business logic and DB access layer
