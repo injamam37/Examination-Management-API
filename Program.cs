@@ -52,16 +52,13 @@ app.MapGet("/health/db", async () =>
             database = "SQL Server"
         });
     }
-    catch (Exception ex)
+    catch (Exception)
     {
-        return Results.Problem(
-            title: "Database connection failed",
-            detail: "The API could not connect to the configured SQL Server database.",
-            statusCode: StatusCodes.Status503ServiceUnavailable,
-            extensions: new Dictionary<string, object?>
-            {
-                ["error"] = ex.Message
-            });
+        return Results.Json(new
+        {
+            status = "unhealthy",
+            message = "Database connection failed"
+        }, statusCode: StatusCodes.Status503ServiceUnavailable);
     }
 });
 

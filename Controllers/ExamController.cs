@@ -52,11 +52,9 @@ public class ExamController : ControllerBase
     }
 
 [HttpGet("studentresult")]
-public async Task<IActionResult> GetStudents(
-    [FromQuery] int idno,
-    [FromQuery] int sessionno)
-{
-    try
+    public async Task<IActionResult> GetStudents(
+        [FromQuery] int idno,
+        [FromQuery] int sessionno)
     {
         var list = new List<object>();
 
@@ -68,24 +66,20 @@ public async Task<IActionResult> GetStudents(
         string query = @"
              SELECT idno,sessionno,sr.semesterno,sr.schemeno,
                 sr.courseno,
-                sr.INTERNAL ,
+                sr.INTERNAL,
                 sr.[EXTERNAL],
-                TOTALMARK ,
-                iif(isnull(INTERNAL ,0)<isnull(MININTERNAL,0) or isnull([EXTERNAL],0)<isnull(MINEXTERNAL,0) or isnull(TOTALMARK ,0)<isnull(c.MINTOTAL,0),'Fail','Pass')passfail
-            FROM STUDMARK  sr inner join TESTCOURSE c on (c.courseno=sr.courseno)
-            WHERE idno=@idno
-            AND sessionno=@sessionno";
+                TOTALMARK,
+                iif(isnull(INTERNAL,0)<isnull(MININTERNAL,0) or isnull([EXTERNAL],0)<isnull(MINEXTERNAL,0) or isnull(TOTALMARK,0)<isnull(c.MINTOTAL,0),'Fail','Pass') passfail
+            FROM STUDMARK sr
+            INNER JOIN TESTCOURSE c ON c.courseno = sr.courseno
+            WHERE idno = @idno
+            AND sessionno = @sessionno";
 
         await using var cmd =
             new SqlCommand(query, conn);
 
-        cmd.Parameters.AddWithValue(
-            "@idno",
-            idno);
-
-        cmd.Parameters.AddWithValue(
-            "@sessionno",
-            sessionno);
+        cmd.Parameters.AddWithValue("@idno", idno);
+        cmd.Parameters.AddWithValue("@sessionno", sessionno);
 
         await using var reader =
             await cmd.ExecuteReaderAsync();
@@ -94,20 +88,11 @@ public async Task<IActionResult> GetStudents(
         {
             list.Add(new
             {
-                courseno =
-                    reader["courseno"],
-
-                internalMarks =
-                    reader["intermark"]  as decimal?,
-
-                externalMarks =
-                    reader["extermark"]   as decimal?,
-
-                total =
-                    reader["marktot"]  as decimal?,
-
-                passfail =
-                    reader["passfail"]
+                courseno = reader["courseno"],
+                internalMarks = reader["INTERNAL"] as decimal?,
+                externalMarks = reader["EXTERNAL"] as decimal?,
+                total = reader["TOTALMARK"] as decimal?,
+                passfail = reader["passfail"]
             });
         }
 
@@ -115,41 +100,21 @@ public async Task<IActionResult> GetStudents(
         {
             return NotFound(new
             {
-                message =
-                    "No results found"
+                message = "No results found"
             });
         }
 
         return Ok(list);
     }
-    catch (Exception ex)
-    {
-        return StatusCode(
-            500,
-            new
-            {
-                message =
-                    "Internal Server Error",
-
-                error =
-                    ex.Message
-            });
-    }
-}
-
 [HttpPost("mark-entry")]
-public async Task<IActionResult> InsertMarkEntry(
-    [FromBody] ExamMarkEntry entry)
-{
-    try
+    public async Task<IActionResult> InsertMarkEntry(
+        [FromBody] ExamMarkEntry entry)
     {
-        // Business Validation
         if (entry.Idno <= 0 || entry.Courseno <= 0)
         {
             return BadRequest(new
             {
-                message =
-                    "idno and courseno must be greater than zero"
+                message = "idno and courseno must be greater than zero"
             });
         }
 
@@ -179,82 +144,36 @@ VALUES
 )";
 
         await using var cmd =
-            new SqlCommand(
-                query,
-                conn);
+            new SqlCommand(query, conn);
 
-        cmd.Parameters.AddWithValue(
-            "@idno",
-            entry.Idno);
+        cmd.Parameters.AddWithValue("@idno", entry.Idno);
+        cmd.Parameters.AddWithValue("@sessionno", entry.Sessionno);
+        cmd.Parameters.AddWithValue("@courseno", entry.Courseno);
+        cmd.Parameters.AddWithValue("@semesterno", entry.Semesterno);
+        cmd.Parameters.AddWithValue("@internal", (object?)entry.InternalMarks ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@external", (object?)entry.ExternalMarks ?? DBNull.Value);
 
-        cmd.Parameters.AddWithValue(
-            "@sessionno",
-            entry.Sessionno);
-
-        cmd.Parameters.AddWithValue(
-            "@courseno",
-            entry.Courseno);
-
-        cmd.Parameters.AddWithValue(
-            "@semesterno",
-            entry.Semesterno);
-
-        cmd.Parameters.AddWithValue(
-            "@internal",
-            (object?)entry.InternalMarks
-            ?? DBNull.Value);
-
-        cmd.Parameters.AddWithValue(
-            "@external",
-            (object?)entry.ExternalMarks
-            ?? DBNull.Value);
-
-        int rows =
-            await cmd.ExecuteNonQueryAsync();
+        int rows = await cmd.ExecuteNonQueryAsync();
 
         if (rows == 0)
         {
-            return StatusCode(
-                500,
-                new
-                {
-                    message =
-                        "Insert failed"
-                });
+            return StatusCode(500, new { message = "Insert failed" });
         }
 
-        return Created(
-            "/api/exam/mark-entry",
-            entry);
+        return Created("/api/exam/mark-entry", entry);
     }
-    catch (Exception ex)
+    [HttpPut("mark-entry/{idno}/{courseno}/{sessionno}")]
+    public async Task<IActionResult> UpdateMark(
+        int idno,
+        int courseno,
+        int sessionno,
+        [FromBody] ExamMarkEntry entry)
     {
-        return StatusCode(
-            500,
-            new
-            {
-                message =
-                    "Internal Server Error",
-
-                error =
-                    ex.Message
-            });
-    }
-}
-
-[HttpPut("mark-entry/{idno}/{courseno}/{sessionno}")]
-public async Task<IActionResult> UpdateMark(
-int idno,int courseno,int sessionno,
-[FromBody] ExamMarkEntry entry)
-{
-    try
-    {
-        if (idno <= 0 ||         courseno<=0 ||       sessionno <=0  )
+        if (idno <= 0 || courseno <= 0 || sessionno <= 0)
         {
             return BadRequest(new
             {
-                message =
-                "Idno, courseno and sessionno must be greater than zero"
+                message = "Idno, courseno and sessionno must be greater than zero"
             });
         }
 
@@ -271,31 +190,19 @@ int idno,int courseno,int sessionno,
         ";
 
         await using var checkCmd =
-            new SqlCommand(
-                checkQuery,
-                conn);
+            new SqlCommand(checkQuery, conn);
 
-        checkCmd.Parameters.AddWithValue(
-            "@idno",
-            idno);
-        checkCmd.Parameters.AddWithValue(
-            "@courseno",
-            courseno);
-        checkCmd.Parameters.AddWithValue(
-            "@sessionno",
-            sessionno);
+        checkCmd.Parameters.AddWithValue("@idno", idno);
+        checkCmd.Parameters.AddWithValue("@courseno", courseno);
+        checkCmd.Parameters.AddWithValue("@sessionno", sessionno);
 
-        int exists =
-        Convert.ToInt32(
-            await checkCmd.ExecuteScalarAsync()
-        );
+        int exists = Convert.ToInt32(await checkCmd.ExecuteScalarAsync());
 
         if (exists == 0)
         {
             return NotFound(new
             {
-                message =
-                "Mark entry not found"
+                message = "Mark entry not found"
             });
         }
 
@@ -309,80 +216,42 @@ int idno,int courseno,int sessionno,
         ";
 
         await using var cmd =
-            new SqlCommand(
-                query,
-                conn);
+            new SqlCommand(query, conn);
 
-        cmd.Parameters.AddWithValue(
-            "@idno",
-            idno);
-        cmd.Parameters.AddWithValue(
-            "@courseno",
-            courseno);
-        cmd.Parameters.AddWithValue(
-            "@sessionno",
-            sessionno);
-        cmd.Parameters.AddWithValue(
-            "@internal",
-            entry.InternalMarks ?? (object)DBNull.Value);
-        cmd.Parameters.AddWithValue(
-            "@external",
-             entry.ExternalMarks ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@idno", idno);
+        cmd.Parameters.AddWithValue("@courseno", courseno);
+        cmd.Parameters.AddWithValue("@sessionno", sessionno);
+        cmd.Parameters.AddWithValue("@internal", entry.InternalMarks ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@external", entry.ExternalMarks ?? (object)DBNull.Value);
 
-        int rows =
-        await cmd.ExecuteNonQueryAsync();
+        int rows = await cmd.ExecuteNonQueryAsync();
 
         if (rows == 0)
         {
-            return StatusCode(
-                500,
-                new
-                {
-                    message =
-                    "Update failed"
-                });
+            return StatusCode(500, new { message = "Update failed" });
         }
 
         return Ok(new
-{
-    idno = idno,
-    courseno = courseno,
-    sessionno = sessionno,
-
-    internalMarks =
-        entry.InternalMarks,
-
-    externalMarks =
-        entry.ExternalMarks
-});
+        {
+            idno = idno,
+            courseno = courseno,
+            sessionno = sessionno,
+            internalMarks = entry.InternalMarks,
+            externalMarks = entry.ExternalMarks
+        });
     }
-    catch (Exception ex)
-    {
-        return StatusCode(
-            500,
-            new
-            {
-                message =
-                "Internal Server Error",
 
-                error =
-                ex.Message
-            });
-    }
-}
-
-[HttpDelete("mark-entry/{idno}/{courseno}/{sessionno}")]
-public async Task<IActionResult> CancelMarkEntry(
-int idno,int courseno,int sessionno)
-{
-    try
+    [HttpDelete("mark-entry/{idno}/{courseno}/{sessionno}")]
+    public async Task<IActionResult> CancelMarkEntry(
+        int idno,
+        int courseno,
+        int sessionno)
     {
-        if (idno <= 0 || courseno <=0 || sessionno<=0)
+        if (idno <= 0 || courseno <= 0 || sessionno <= 0)
         {
             return BadRequest(new
             {
-                message =
-                "Idno, courseno and sessionno must be greater than zero"
+                message = "Idno, courseno and sessionno must be greater than zero"
             });
         }
 
@@ -393,55 +262,29 @@ int idno,int courseno,int sessionno)
 
         string query =
         @"
-        update
-         STUDMARK set cancel=1
+        UPDATE STUDMARK SET cancel=1
         WHERE idno=@idno and courseno=@courseno and sessionno=@sessionno
         ";
 
         await using var deleteCmd =
-            new SqlCommand(
-                query,
-                conn);
+            new SqlCommand(query, conn);
 
-        deleteCmd.Parameters.AddWithValue(
-            "@idno",
-            idno);
-        deleteCmd.Parameters.AddWithValue(
-            "@courseno",
-            courseno);
-        deleteCmd.Parameters.AddWithValue(
-            "@sessionno",
-            sessionno);
+        deleteCmd.Parameters.AddWithValue("@idno", idno);
+        deleteCmd.Parameters.AddWithValue("@courseno", courseno);
+        deleteCmd.Parameters.AddWithValue("@sessionno", sessionno);
 
-        int rows =
-            await deleteCmd.ExecuteNonQueryAsync();
+        int rows = await deleteCmd.ExecuteNonQueryAsync();
 
         if (rows == 0)
         {
-            return NotFound(
-                new
-                {
-                    message =
-                    "Record not found"
-                });
+            return NotFound(new
+            {
+                message = "Record not found"
+            });
         }
 
         return NoContent();
     }
-    catch (Exception ex)
-    {
-        return StatusCode(
-            500,
-            new
-            {
-                message =
-                "Internal Server Error",
-
-                error =
-                ex.Message
-            });
-    }
-}
 
 
 }
