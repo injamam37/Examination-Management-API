@@ -1,4 +1,4 @@
-# Exam API Demo
+# Examination-Management-API
 
 ASP.NET Core Web API project demonstrating RESTful API development
 with SQL Server, built as part of a transition from ASP.NET Web Forms
