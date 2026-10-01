@@ -4,7 +4,7 @@ namespace ExamApiDemo.Interfaces;
 
 public interface ICourseService
 {
-       Task<PagedCourseResult> GetAllAsync(
+    Task<PagedCourseResult> GetAllAsync(
         int page,
         int pageSize);
 

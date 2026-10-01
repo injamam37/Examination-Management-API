@@ -4,7 +4,7 @@ namespace ExamApiDemo.Models;
 
 public class ExamResultModel
 {
-        public int Idno { get; set; }
+    public int Idno { get; set; }
 
     public int Sessionno { get; set; }
 

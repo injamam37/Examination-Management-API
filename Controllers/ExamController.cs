@@ -91,11 +91,11 @@ public async Task<IActionResult> GetStudents(
         string query = @"
              SELECT idno,sessionno,sr.semesterno,sr.schemeno,
                 sr.courseno,
-                sr.INTERMARK,
-                sr.EXTERMARK,
-                marktot,
-                iif(isnull(INTERMARK,0)<isnull(minmark_i,0) or isnull(EXTERMARK,0)<isnull(minmarks,0) or isnull(marktot,0)<isnull(c.MIN_MARK_TOT_PER,0),'Fail','Pass')passfail
-            FROM acd_student_result sr inner join acd_course c on (c.courseno=sr.courseno)
+                sr.INTERNAL ,
+                sr.[EXTERNAL],
+                TOTALMARK ,
+                iif(isnull(INTERNAL ,0)<isnull(MININTERNAL,0) or isnull([EXTERNAL],0)<isnull(MINEXTERNAL,0) or isnull(TOTALMARK ,0)<isnull(c.MINTOTAL,0),'Fail','Pass')passfail
+            FROM STUDMARK  sr inner join TESTCOURSE c on (c.courseno=sr.courseno)
             WHERE idno=@idno
             AND sessionno=@sessionno";
 
@@ -417,7 +417,7 @@ int idno,int courseno,int sessionno)
         string query =
         @"
         update
-         ACD_STUD_REST_MARK set cancel=1
+         STUDMARK set cancel=1
         WHERE idno=@idno and courseno=@courseno and sessionno=@sessionno
         ";
 

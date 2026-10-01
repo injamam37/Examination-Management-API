@@ -31,7 +31,7 @@ public async Task<PagedCourseResult> GetAllAsync(int page, int pageSize)
     string countQuery =
     @"
     SELECT COUNT(*)
-    FROM TEST_ACD_COURSE";
+    FROM TESTCOURSE";
 
     await using var countCmd =
         new SqlCommand(
@@ -53,7 +53,7 @@ public async Task<PagedCourseResult> GetAllAsync(int page, int pageSize)
         courseno,
         coursecode,
         coursename
-    FROM TEST_ACD_COURSE
+    FROM TESTCOURSE
     ORDER BY courseno
     OFFSET @offset ROWS
     FETCH NEXT @pageSize ROWS ONLY";
@@ -107,7 +107,7 @@ SELECT
     courseno,
     coursecode,
     coursename
-FROM TEST_ACD_COURSE
+FROM TESTCOURSE
 WHERE courseno=@courseno";
 
         await using var cmd =
@@ -140,7 +140,7 @@ WHERE courseno=@courseno";
 
         string query = @"
 SELECT COUNT(*)
-FROM TEST_ACD_COURSE
+FROM TESTCOURSE
 WHERE courseno=@courseno";
 
         await using var cmd =
@@ -162,7 +162,7 @@ WHERE courseno=@courseno";
         await conn.OpenAsync();
 
         string query = @"
-INSERT INTO TEST_ACD_COURSE
+INSERT INTO TESTCOURSE
 (
     courseno,
     coursecode,
@@ -193,7 +193,7 @@ VALUES
         await conn.OpenAsync();
 
         string query = @"
-UPDATE TEST_ACD_COURSE
+UPDATE TESTCOURSE
 SET
     COURSECODE=@coursecode,
     COURSENAME=@coursename
@@ -219,7 +219,7 @@ WHERE
 
         string query = @"
 DELETE
-FROM TEST_ACD_COURSE
+FROM TESTCOURSE
 WHERE courseno=@courseno";
 
         await using var cmd =
