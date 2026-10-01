@@ -26,20 +26,8 @@ public class ExamController : ControllerBase
         });
     }
 
-    [HttpGet("hello")]
-    public IActionResult Hello()
-    {
-        return Ok(new
-        {
-            message = "Exam API is running",
-            module = "Examination"
-        });
-    }
-
     [HttpGet("ping-db")]
-public async Task<IResult> PingDb()
-{
-    try
+    public async Task<IResult> PingDb()
     {
         await using var connection =
             new SqlConnection(_connString);
@@ -62,17 +50,6 @@ public async Task<IResult> PingDb()
             status = "connected"
         });
     }
-    catch (Exception ex)
-    {
-        return Results.Json(
-            new
-            {
-                status = "failed",
-                error = ex.Message
-            },
-            statusCode: 500);
-    }
-}
 
 [HttpGet("studentresult")]
 public async Task<IActionResult> GetStudents(

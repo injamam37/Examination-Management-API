@@ -47,89 +47,63 @@ public async Task<IActionResult> AllCourse(
     [HttpGet("{courseno}")]
     public async Task<IActionResult> Courseno(int courseno)
     {
-        try
-        {
-            var course =
-                await _courseService.GetByIdAsync(courseno);
+        var course =
+            await _courseService.GetByIdAsync(courseno);
 
-            if (course == null)
+        if (course == null)
+        {
+            return NotFound(new
             {
-                return NotFound(new
-                {
-                    message = "No results found"
-                });
-            }
+                message = "No results found"
+            });
+        }
 
-            return Ok(course);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(
-                500,
-                new
-                {
-                    message = "Internal Server Error",
-                    error = ex.Message
-                });
-        }
+        return Ok(course);
     }
 
     [HttpPost]
     public async Task<IActionResult> InsertCourse(
         [FromBody] CourseModel course)
     {
-        try
+        if (
+            course.Courseno <= 0 ||
+            string.IsNullOrWhiteSpace(course.CourseCode) ||
+            string.IsNullOrWhiteSpace(course.CourseName))
         {
-            if (
-                course.Courseno <= 0 ||
-                string.IsNullOrWhiteSpace(course.CourseCode) ||
-                string.IsNullOrWhiteSpace(course.CourseName))
+            return BadRequest(new
             {
-                return BadRequest(new
-                {
-                    message =
-                    "courseno must be greater than zero and Course Name and Course Code cannot be null"
-                });
-            }
-
-            bool exists =
-                await _courseService.ExistsAsync(course.Courseno);
-
-            if (exists)
-            {
-                return Conflict(new
-                {
-                    message = "Course already exists"
-                });
-            }
-
-            int rows =
-                await _courseService.InsertAsync(course);
-
-            if (rows == 0)
-            {
-                return StatusCode(
-                    500,
-                    new
-                    {
-                        message = "Insert failed"
-                    });
-            }
-
-            return Created(
-                $"/api/course/{course.Courseno}",
-                course);
+                message =
+                "courseno must be greater than zero and Course Name and Course Code cannot be null"
+            });
         }
-        catch (Exception ex)
+
+        bool exists =
+            await _courseService.ExistsAsync(course.Courseno);
+
+        if (exists)
+        {
+            return Conflict(new
+            {
+                message = "Course already exists"
+            });
+        }
+
+        int rows =
+            await _courseService.InsertAsync(course);
+
+        if (rows == 0)
         {
             return StatusCode(
                 500,
                 new
                 {
-                    message = "Internal Server Error",
-                    error = ex.Message
+                    message = "Insert failed"
                 });
         }
+
+        return Created(
+            $"/api/course/{course.Courseno}",
+            course);
     }
 
     [HttpPut("{courseno}")]
@@ -137,96 +111,70 @@ public async Task<IActionResult> AllCourse(
         int courseno,
         [FromBody] CourseModel course)
     {
-        try
+        if (
+            courseno <= 0 ||
+            string.IsNullOrWhiteSpace(course.CourseCode) ||
+            string.IsNullOrWhiteSpace(course.CourseName))
         {
-            if (
-                courseno <= 0 ||
-                string.IsNullOrWhiteSpace(course.CourseCode) ||
-                string.IsNullOrWhiteSpace(course.CourseName))
+            return BadRequest(new
             {
-                return BadRequest(new
-                {
-                    message =
-                    "courseno must be greater than zero and Course Name and Course Code cannot be null"
-                });
-            }
-
-            bool exists =
-                await _courseService.ExistsAsync(courseno);
-
-            if (!exists)
-            {
-                return NotFound(new
-                {
-                    message = "Course Not Found"
-                });
-            }
-
-            int rows =
-                await _courseService.UpdateAsync(
-                    courseno,
-                    course);
-
-            if (rows == 0)
-            {
-                return StatusCode(
-                    500,
-                    new
-                    {
-                        message = "Update failed"
-                    });
-            }
-
-            return Ok(course);
+                message =
+                "courseno must be greater than zero and Course Name and Course Code cannot be null"
+            });
         }
-        catch (Exception ex)
+
+        bool exists =
+            await _courseService.ExistsAsync(courseno);
+
+        if (!exists)
+        {
+            return NotFound(new
+            {
+                message = "Course Not Found"
+            });
+        }
+
+        int rows =
+            await _courseService.UpdateAsync(
+                courseno,
+                course);
+
+        if (rows == 0)
         {
             return StatusCode(
                 500,
                 new
                 {
-                    message = "Internal Server Error",
-                    error = ex.Message
+                    message = "Update failed"
                 });
         }
+
+        return Ok(course);
     }
 
     [HttpDelete("{courseno}")]
     public async Task<IActionResult> DeleteCourse(
         int courseno)
     {
-        try
+        if (courseno <= 0)
         {
-            if (courseno <= 0)
+            return BadRequest(new
             {
-                return BadRequest(new
-                {
-                    message = "courseno must be valid"
-                });
-            }
-
-            int rows =
-                await _courseService.DeleteAsync(courseno);
-
-            if (rows == 0)
-            {
-                return NotFound(new
-                {
-                    message = "Course Not Found"
-                });
-            }
-
-            return NoContent();
+                message = "courseno must be valid"
+            });
         }
-        catch (Exception ex)
+
+        int rows =
+            await _courseService.DeleteAsync(courseno);
+
+        if (rows == 0)
         {
-            return StatusCode(
-                500,
-                new
-                {
-                    message = "Internal Server Error",
-                    error = ex.Message
-                });
+            return NotFound(new
+            {
+                message = "Course Not Found"
+            });
         }
+
+        return NoContent();
     }
 }

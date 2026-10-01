@@ -21,9 +21,9 @@ public class ExamResultController : ControllerBase
         [FromQuery] int idno,
         [FromQuery] int sessionno)
     {
-                if (
+        if (
             idno <= 0 ||
-           sessionno <= 0 )
+            sessionno <= 0)
         {
             return BadRequest(new
             {
