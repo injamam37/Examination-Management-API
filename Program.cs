@@ -33,5 +33,10 @@ if (app.Environment.IsDevelopment())
     app.UseMiddleware<ExceptionMiddleware>();
     app.MapControllers();
 
+app.MapGet("/", () => Results.Ok(new
+{
+    message = "Exam API is running"
+}));
+
 app.Run();
 
