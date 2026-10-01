@@ -91,13 +91,13 @@ AND ISNULL(sr.CANCEL,0)=0";
 
     public async Task<ExamResultModel?> CalculateResultAsync(
     CalculateResultRequest request)
-{
-    await using var conn =
-        new SqlConnection(_connString);
+    {
+        await using var conn =
+            new SqlConnection(_connString);
 
-    await conn.OpenAsync();
+        await conn.OpenAsync();
 
-    string query = @"
+        string query = @"
 SELECT
     m.IDNO,
     m.SESSIONNO,
@@ -117,55 +117,55 @@ AND m.COURSENO=@courseno
 AND m.SEMESTERNO=@semesterno
 AND ISNULL(m.CANCEL,0)=0";
 
-    await using var cmd =
-        new SqlCommand(query, conn);
+        await using var cmd =
+            new SqlCommand(query, conn);
 
-    cmd.Parameters.AddWithValue("@idno", request.Idno);
-    cmd.Parameters.AddWithValue("@sessionno", request.Sessionno);
-    cmd.Parameters.AddWithValue("@courseno", request.Courseno);
-    cmd.Parameters.AddWithValue("@semesterno", request.Semesterno);
+        cmd.Parameters.AddWithValue("@idno", request.Idno);
+        cmd.Parameters.AddWithValue("@sessionno", request.Sessionno);
+        cmd.Parameters.AddWithValue("@courseno", request.Courseno);
+        cmd.Parameters.AddWithValue("@semesterno", request.Semesterno);
 
-    await using var reader =
-        await cmd.ExecuteReaderAsync();
+        await using var reader =
+            await cmd.ExecuteReaderAsync();
 
-    if (!await reader.ReadAsync())
-    {
-        return null;
-    }
+        if (!await reader.ReadAsync())
+        {
+            return null;
+        }
 
-    decimal? internalMark =
-        reader["INTERNAL"] as decimal?;
+        decimal? internalMark =
+            reader["INTERNAL"] as decimal?;
 
-    decimal? externalMark =
-        reader["EXTERNAL"] as decimal?;
+        decimal? externalMark =
+            reader["EXTERNAL"] as decimal?;
 
-        decimal minInternal =reader["MININTERNAL"] as decimal? ?? 0;
-        decimal minExternal =reader["MINEXTERNAL"] as decimal? ?? 0;
-        decimal minTotal =reader["MINTOTAL"] as decimal? ?? 0;
+        decimal minInternal = reader["MININTERNAL"] as decimal? ?? 0;
+        decimal minExternal = reader["MINEXTERNAL"] as decimal? ?? 0;
+        decimal minTotal = reader["MINTOTAL"] as decimal? ?? 0;
 
-    decimal total =
-        (internalMark ?? 0)
-        + (externalMark ?? 0);
+        decimal total =
+            (internalMark ?? 0)
+            + (externalMark ?? 0);
 
-    string passFail =
-        (
-            (internalMark ?? 0) < minInternal
-            ||
-            (externalMark ?? 0) < minExternal
-            ||
-            total < minTotal
-        )
-        ? "Fail"
-        : "Pass";
+        string passFail =
+            (
+                (internalMark ?? 0) < minInternal
+                ||
+                (externalMark ?? 0) < minExternal
+                ||
+                total < minTotal
+            )
+            ? "Fail"
+            : "Pass";
 
-    string grade =
-        passFail == "Pass"
-        ? "P"
-        : "F";
+        string grade =
+            passFail == "Pass"
+            ? "P"
+            : "F";
 
-    await reader.CloseAsync();
+        await reader.CloseAsync();
 
-    string updateQuery = @"
+        string updateQuery = @"
 UPDATE STUDMARK
 SET
     TOTALMARK=@total,
@@ -177,30 +177,30 @@ AND SESSIONNO=@sessionno
 AND COURSENO=@courseno
 AND SEMESTERNO=@semesterno";
 
-    await using var updateCmd =
-        new SqlCommand(updateQuery, conn);
+        await using var updateCmd =
+            new SqlCommand(updateQuery, conn);
 
-    updateCmd.Parameters.AddWithValue("@total", total);
-    updateCmd.Parameters.AddWithValue("@passfail", passFail);
-    updateCmd.Parameters.AddWithValue("@grade", grade);
+        updateCmd.Parameters.AddWithValue("@total", total);
+        updateCmd.Parameters.AddWithValue("@passfail", passFail);
+        updateCmd.Parameters.AddWithValue("@grade", grade);
 
-    updateCmd.Parameters.AddWithValue("@idno", request.Idno);
-    updateCmd.Parameters.AddWithValue("@sessionno", request.Sessionno);
-    updateCmd.Parameters.AddWithValue("@courseno", request.Courseno);
-    updateCmd.Parameters.AddWithValue("@semesterno", request.Semesterno);
+        updateCmd.Parameters.AddWithValue("@idno", request.Idno);
+        updateCmd.Parameters.AddWithValue("@sessionno", request.Sessionno);
+        updateCmd.Parameters.AddWithValue("@courseno", request.Courseno);
+        updateCmd.Parameters.AddWithValue("@semesterno", request.Semesterno);
 
-    await updateCmd.ExecuteNonQueryAsync();
+        await updateCmd.ExecuteNonQueryAsync();
 
-    return new ExamResultModel
-    {
-        Idno = request.Idno,
-        Sessionno = request.Sessionno,
-        Courseno = request.Courseno,
-        InternalMarks = internalMark,
-        ExternalMarks = externalMark,
-        Total = total,
-        PassFail = passFail,
-        Grade = grade
-    };
-}
+        return new ExamResultModel
+        {
+            Idno = request.Idno,
+            Sessionno = request.Sessionno,
+            Courseno = request.Courseno,
+            InternalMarks = internalMark,
+            ExternalMarks = externalMark,
+            Total = total,
+            PassFail = passFail,
+            Grade = grade
+        };
+    }
 }

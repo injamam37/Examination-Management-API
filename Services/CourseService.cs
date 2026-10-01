@@ -12,43 +12,43 @@ public class CourseService : ICourseService
     {
         _connString = connString;
     }
-public async Task<PagedCourseResult> GetAllAsync(int page, int pageSize)
-{
-    var result =
-        new PagedCourseResult();
+    public async Task<PagedCourseResult> GetAllAsync(int page, int pageSize)
+    {
+        var result =
+            new PagedCourseResult();
 
-    result.Page = page;
-    result.PageSize = pageSize;
+        result.Page = page;
+        result.PageSize = pageSize;
 
-    int offset =
-        (page - 1) * pageSize;
+        int offset =
+            (page - 1) * pageSize;
 
-    await using var conn =
-        new SqlConnection(_connString);
+        await using var conn =
+            new SqlConnection(_connString);
 
-    await conn.OpenAsync();
+        await conn.OpenAsync();
 
-    string countQuery =
-    @"
+        string countQuery =
+        @"
     SELECT COUNT(*)
     FROM TESTCOURSE";
 
-    await using var countCmd =
-        new SqlCommand(
-            countQuery,
-            conn);
+        await using var countCmd =
+            new SqlCommand(
+                countQuery,
+                conn);
 
-    result.TotalRecords =
-        Convert.ToInt32(
-            await countCmd.ExecuteScalarAsync());
+        result.TotalRecords =
+            Convert.ToInt32(
+                await countCmd.ExecuteScalarAsync());
 
-    result.TotalPages =
-        (int)Math.Ceiling(
-            (double)result.TotalRecords
-            / pageSize);
+        result.TotalPages =
+            (int)Math.Ceiling(
+                (double)result.TotalRecords
+                / pageSize);
 
-    string query =
-    @"
+        string query =
+        @"
     SELECT
         courseno,
         coursecode,
@@ -58,42 +58,42 @@ public async Task<PagedCourseResult> GetAllAsync(int page, int pageSize)
     OFFSET @offset ROWS
     FETCH NEXT @pageSize ROWS ONLY";
 
-    await using var cmd =
-        new SqlCommand(
-            query,
-            conn);
+        await using var cmd =
+            new SqlCommand(
+                query,
+                conn);
 
-    cmd.Parameters.AddWithValue(
-        "@offset",
-        offset);
+        cmd.Parameters.AddWithValue(
+            "@offset",
+            offset);
 
-    cmd.Parameters.AddWithValue(
-        "@pageSize",
-        pageSize);
+        cmd.Parameters.AddWithValue(
+            "@pageSize",
+            pageSize);
 
-    await using var reader =
-        await cmd.ExecuteReaderAsync();
+        await using var reader =
+            await cmd.ExecuteReaderAsync();
 
-    while (await reader.ReadAsync())
-    {
-        result.Data.Add(
-            new CourseModel
-            {
-                Courseno =
-                    Convert.ToInt32(
-                        reader["courseno"]),
+        while (await reader.ReadAsync())
+        {
+            result.Data.Add(
+                new CourseModel
+                {
+                    Courseno =
+                        Convert.ToInt32(
+                            reader["courseno"]),
 
-                CourseCode =
-                    reader["coursecode"].ToString(),
+                    CourseCode =
+                        reader["coursecode"].ToString(),
 
-                CourseName =
-                    reader["coursename"].ToString()
-            });
+                    CourseName =
+                        reader["coursename"].ToString()
+                });
+        }
+
+        return result;
+
     }
-
-    return result;
-   
-}
 
     public async Task<CourseModel?> GetByIdAsync(int courseno)
     {

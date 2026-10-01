@@ -15,34 +15,34 @@ public class CourseController : ControllerBase
         _courseService = courseService;
     }
 
-  [HttpGet]
-public async Task<IActionResult> AllCourse(
-    [FromQuery] int page = 1,
-    [FromQuery] int pageSize = 10)
-{
-    if (page < 1)
+    [HttpGet]
+    public async Task<IActionResult> AllCourse(
+      [FromQuery] int page = 1,
+      [FromQuery] int pageSize = 10)
     {
-        return BadRequest(new
+        if (page < 1)
         {
-            message =
-            "page must be greater than or equal to 1"
-        });
-    }
+            return BadRequest(new
+            {
+                message =
+                "page must be greater than or equal to 1"
+            });
+        }
 
-    if (pageSize < 1 || pageSize > 100)
-    {
-        return BadRequest(new
+        if (pageSize < 1 || pageSize > 100)
         {
-            message =
-            "pageSize must be between 1 and 100"
-        });
+            return BadRequest(new
+            {
+                message =
+                "pageSize must be between 1 and 100"
+            });
+        }
+
+        var result =
+            await _courseService.GetAllAsync(page, pageSize);
+
+        return Ok(result);
     }
-
-    var result =
-        await _courseService.GetAllAsync(    page,     pageSize);
-
-    return Ok(result);
-}
 
     [HttpGet("{courseno}")]
     public async Task<IActionResult> Courseno(int courseno)

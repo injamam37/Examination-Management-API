@@ -11,7 +11,7 @@ public class ExamController : ControllerBase
 {
     private readonly string _connString;
 
-  public ExamController(string connString)
+    public ExamController(string connString)
     {
         _connString = connString;
     }
@@ -51,7 +51,7 @@ public class ExamController : ControllerBase
         });
     }
 
-[HttpGet("studentresult")]
+    [HttpGet("studentresult")]
     public async Task<IActionResult> GetStudents(
         [FromQuery] int idno,
         [FromQuery] int sessionno)
@@ -64,16 +64,25 @@ public class ExamController : ControllerBase
         await conn.OpenAsync();
 
         string query = @"
-             SELECT idno,sessionno,sr.semesterno,sr.schemeno,
-                sr.courseno,
-                sr.INTERNAL,
-                sr.[EXTERNAL],
-                TOTALMARK,
-                iif(isnull(INTERNAL,0)<isnull(MININTERNAL,0) or isnull([EXTERNAL],0)<isnull(MINEXTERNAL,0) or isnull(TOTALMARK,0)<isnull(c.MINTOTAL,0),'Fail','Pass') passfail
-            FROM STUDMARK sr
-            INNER JOIN TESTCOURSE c ON c.courseno = sr.courseno
-            WHERE idno = @idno
-            AND sessionno = @sessionno";
+SELECT
+    sr.IDNO,
+    sr.SESSIONNO,
+    sr.SEMESTERNO,
+    sr.COURSENO,
+    sr.INTERNAL,
+    sr.[EXTERNAL],
+    sr.TOTALMARK,
+    IIF(
+        ISNULL(sr.INTERNAL, 0) < ISNULL(c.MININTERNAL, 0)
+        OR ISNULL(sr.[EXTERNAL], 0) < ISNULL(c.MINEXTERNAL, 0)
+        OR ISNULL(sr.TOTALMARK, 0) < ISNULL(c.MINTOTAL, 0),
+        'Fail',
+        'Pass'
+    ) AS PASSFAIL
+FROM STUDMARK AS sr
+INNER JOIN TESTCOURSE AS c ON c.COURSENO = sr.COURSENO
+WHERE sr.IDNO = @idno
+AND sr.SESSIONNO = @sessionno";
 
         await using var cmd =
             new SqlCommand(query, conn);
@@ -106,7 +115,7 @@ public class ExamController : ControllerBase
 
         return Ok(list);
     }
-[HttpPost("mark-entry")]
+    [HttpPost("mark-entry")]
     public async Task<IActionResult> InsertMarkEntry(
         [FromBody] ExamMarkEntry entry)
     {

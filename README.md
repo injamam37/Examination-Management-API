@@ -99,20 +99,6 @@ CREATE TABLE STUDMARK (
 );
 ```
 
-### Important note about table naming
-
-The project contains some older/legacy SQL names in different files, such as:
-
-- TEST_ACD_COURSE
-- ACD_STUD_REST_MARK
-- ACD_COURSE
-- ACD_STUDENT_RESULT
-
-Those names are not consistent with the final schema defined for this project. To avoid runtime errors and mismatches, use only:
-
-- TESTCOURSE
-- STUDMARK
-
 ### Sample dummy data
 
 ```sql
@@ -153,16 +139,22 @@ You can test the API using browser or curl.
 ### Quick health check
 
 ```powershell
-curl http://localhost:5159/api/exam
+curl http://localhost:5159/health
 ```
 
 ### Database connectivity check
 
 ```powershell
-curl http://localhost:5159/api/exam/ping-db
+curl http://localhost:5159/health/db
 ```
 
 ## API endpoints
+
+### Health endpoints
+
+- GET /
+- GET /health
+- GET /health/db
 
 ### Course endpoints
 
@@ -175,7 +167,6 @@ curl http://localhost:5159/api/exam/ping-db
 ### Exam endpoints
 
 - GET /api/exam
-- GET /api/exam/hello
 - GET /api/exam/ping-db
 - GET /api/exam/studentresult
 - POST /api/exam/mark-entry
