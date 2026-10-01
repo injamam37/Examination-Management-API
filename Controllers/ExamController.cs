@@ -182,7 +182,7 @@ public async Task<IActionResult> InsertMarkEntry(
         await conn.OpenAsync();
 
         string query = @"
-INSERT INTO ACD_STUD_REST_MARK
+INSERT INTO STUDMARK
 (
     IDNO,
     SESSIONNO,
@@ -289,7 +289,7 @@ int idno,int courseno,int sessionno,
         string checkQuery =
         @"
         SELECT COUNT(*)
-        FROM ACD_STUD_REST_MARK
+        FROM STUDMARK
         WHERE idno=@idno and courseno=@courseno and sessionno=@sessionno
         ";
 
@@ -324,7 +324,7 @@ int idno,int courseno,int sessionno,
 
         string query =
         @"
-        UPDATE ACD_STUD_REST_MARK
+        UPDATE STUDMARK
         SET
             INTERNAL=iif(@internal is null,INTERNAL,@internal),
             [EXTERNAL]=iif(@external is null,[EXTERNAL],@external)

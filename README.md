@@ -70,16 +70,12 @@ Important:
 
 ## Database setup instructions
 
-Use the SQL script provided in the sample file named:
+The project should use only the following two database tables and their columns.
 
-sample table and insert query.txt
-
-This file contains the table creation script and sample dummy data for the app.
-
-### Table creation script
+### Canonical schema to use
 
 ```sql
-CREATE TABLE TEST_ACD_COURSE (
+CREATE TABLE TESTCOURSE (
     COURSENO INT NOT NULL PRIMARY KEY,
     COURSECODE NVARCHAR(50) NOT NULL,
     COURSENAME NVARCHAR(200) NOT NULL,
@@ -88,7 +84,7 @@ CREATE TABLE TEST_ACD_COURSE (
     MINTOTAL DECIMAL(18,2) NULL
 );
 
-CREATE TABLE ACD_STUD_REST_MARK (
+CREATE TABLE STUDMARK (
     IDNO INT NOT NULL,
     SESSIONNO INT NOT NULL,
     COURSENO INT NOT NULL,
@@ -99,21 +95,35 @@ CREATE TABLE ACD_STUD_REST_MARK (
     PASSFAIL NVARCHAR(20) NULL,
     GRADE NVARCHAR(10) NULL,
     CANCEL BIT NOT NULL DEFAULT 0,
-    CONSTRAINT PK_ACD_STUD_REST_MARK PRIMARY KEY (IDNO, SESSIONNO, COURSENO, SEMESTERNO)
+    CONSTRAINT PK_STUDMARK PRIMARY KEY (IDNO, SESSIONNO, COURSENO, SEMESTERNO)
 );
 ```
+
+### Important note about table naming
+
+The project contains some older/legacy SQL names in different files, such as:
+
+- TEST_ACD_COURSE
+- ACD_STUD_REST_MARK
+- ACD_COURSE
+- ACD_STUDENT_RESULT
+
+Those names are not consistent with the final schema defined for this project. To avoid runtime errors and mismatches, use only:
+
+- TESTCOURSE
+- STUDMARK
 
 ### Sample dummy data
 
 ```sql
-INSERT INTO TEST_ACD_COURSE (COURSENO, COURSECODE, COURSENAME, MININTERNAL, MINEXTERNAL, MINTOTAL)
+INSERT INTO TESTCOURSE (COURSENO, COURSECODE, COURSENAME, MININTERNAL, MINEXTERNAL, MINTOTAL)
 VALUES
 (101, 'CSE101', 'Computer Fundamentals', 20.00, 30.00, 50.00),
 (102, 'CSE102', 'Database Systems', 20.00, 30.00, 50.00),
 (103, 'CSE103', 'Web Programming', 20.00, 30.00, 50.00),
 (104, 'CSE104', 'Operating Systems', 20.00, 30.00, 50.00);
 
-INSERT INTO ACD_STUD_REST_MARK (IDNO, SESSIONNO, COURSENO, SEMESTERNO, INTERNAL, [EXTERNAL], TOTALMARK, PASSFAIL, GRADE, CANCEL)
+INSERT INTO STUDMARK (IDNO, SESSIONNO, COURSENO, SEMESTERNO, INTERNAL, [EXTERNAL], TOTALMARK, PASSFAIL, GRADE, CANCEL)
 VALUES
 (1, 2024, 101, 1, 18.00, 35.00, 53.00, 'Pass', 'P', 0),
 (1, 2024, 102, 1, 22.00, 28.00, 50.00, 'Pass', 'P', 0),

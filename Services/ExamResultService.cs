@@ -166,7 +166,7 @@ AND ISNULL(m.CANCEL,0)=0";
     await reader.CloseAsync();
 
     string updateQuery = @"
-UPDATE ACD_STUD_REST_MARK
+UPDATE STUDMARK
 SET
     TOTALMARK=@total,
     PASSFAIL=@passfail,
